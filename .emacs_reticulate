@@ -143,4 +143,4 @@
 (global-set-key (kbd "M-L") 'windmove-right)
 (global-set-key (kbd "M-J") 'windmove-left)
 
-(load-file "~/elisp/r-org-utils.el")
+(load-file "./r-org-utils.el")

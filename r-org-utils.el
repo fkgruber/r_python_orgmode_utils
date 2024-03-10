@@ -305,7 +305,7 @@
   )
 
 (defun get-org-current-rsession()
-  "When you are in an org file get the current R session based on global header, subtree, property or source code :session property whichever is relevant. Save it to variable session_name"
+  "When you are in an org file get the current R session based on  global header, subtree, property or source code :session property whichever is relevant. Save it to variable session_name"
   (interactive)
   (let*
       ((mylist (org-babel-get-src-block-info))
@@ -366,12 +366,16 @@
 	(if (string="python" lang)
 	    (progn
 	      (message "exiting python repl")
-	      (r-org-utils-elpy-eval-string "exit")
-	      ;;(python-shell-send-string "exit")
 	      (save-window-excursion
 	       	(elpy-shell-switch-to-shell)
 	       	(inferior-ess-r-mode)
+		(setq comint-output-filter-functions '(ansi-color-process-output comint-postoutput-scroll-to-bottom comint-watch-for-password-prompt))
+		(insert "exit")
+		(comint-send-input)
 	       	)
+	      ;;(r-org-utils-elpy-eval-string "exit")
+	      ;;(python-shell-send-string "exit")
+
 	      )
 	  )
 	  )

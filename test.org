@@ -43,13 +43,9 @@ reticulate::py_run_string("def __PYTHON_EL_eval_file(filename, tempname, delete)
     return __PYTHON_EL_eval(source, filename)")
 #+end_src
 
-#+RESULTS:
-|---|
-
-
 * test it
 #+begin_src python :results output
-print("test2")
+print("test")
 #+end_src
 
 #+RESULTS:
