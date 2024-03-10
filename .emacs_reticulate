@@ -1,0 +1,146 @@
+(setq package-check-signature nil)
+
+(require 'package)
+(setq-default
+ load-prefer-newer t
+ package-enable-at-startup nil)
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+			 ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+  			 ("melpa" . "https://melpa.org/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/")
+			 ("gnu-devel" . "https://elpa.gnu.org/devel/")
+			 ))
+
+(package-initialize)
+
+(use-package exec-path-from-shell)
+(exec-path-from-shell-initialize)
+(setq x-select-enable-clipboard t)
+(setq byte-compile-warnings '(cl-functions))
+
+(add-to-list 'load-path "~/elisp/")
+(setq-default
+   use-package-always-defer t
+   use-package-always-ensure t)
+
+(use-package ess
+  :ensure t
+  :init (require 'ess-site))
+;;(require 'ess-site)
+
+
+
+(add-hook 'inferior-ess-mode-hook
+          (lambda ()
+            ;; Disable font-locking in this buffer to improve performance
+            (font-lock-mode -1)
+            ;; Prevent font-locking from being re-enabled in this buffer
+            (make-local-variable 'font-lock-function)
+            (setq font-lock-function (lambda (_) nil))
+            (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
+
+
+(use-package org
+  :config
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+  (setq org-agenda-include-diary t)
+  (require 'ox-md nil t)
+  (setq org-export-html-validation-link nil)
+  (setq org-export-allow-BIND t)
+  (setq org-support-shift-select t)
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-directory "~/gitRepos/general-functions/org/")
+  (setq org-src-preserve-indentation t)
+  (setq org-edit-src-auto-save-idle-delay 60)
+  (setq org-edit-src-turn-on-auto-save nil)
+  (setq org-startup-truncated nil)
+  (setq calendar-mark-diary-entries-flag t)
+  (setq org-crypt-key nil)
+  (setq org-babel-use-quick-and-dirty-noweb-expansion nil)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (require 'org-crypt)
+  (org-crypt-use-before-save-magic)
+  (setq org-export-latex-hyperref-format "\\ref{%s}")
+  (setq org-latex-listings t)
+  (require 'ox-extra)
+  (ox-extras-activate '(ignore-headlines))
+  )
+
+(use-package ob-reticulate)
+
+(use-package org-contrib)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (emacs-lisp . t)
+   (shell . t)
+   (org . t)
+   (R . t)
+   (python . t)
+))
+
+(use-package elpy
+;;  :ensure tka
+  :commands elpy-enable
+  :init
+  (elpy-enable)
+  :after python
+  :config
+  (setq elpy-rpc-backend "jedi"
+	elpy-rpc-python-command "python"
+  	python-shell-interpreter "python"
+  	python-shell-interpreter-args "-i"
+  	python-shell-prompt-detect-failure-warning nil
+	elpy-shell-echo-input t)
+  (add-to-list 'python-shell-completion-native-disabled-interpreters "python")
+  )
+
+
+(setq python-shell-prompt-detect-failure-warning nil)
+
+(eval-after-load "elpy"
+ '(progn
+    (define-key elpy-mode-map (kbd "C-c C-j") 'elpy-shell-send-statement)
+    (define-key elpy-mode-map (kbd "C-c C-n") 'elpy-shell-send-statement-and-step)
+    (define-key elpy-mode-map (kbd "C-c C-c") 'elpy-shell-send-group-and-step)
+    (define-key elpy-mode-map (kbd "C-c C-r") 'elpy-shell-send-region-or-buffer)
+    (define-key elpy-mode-map (kbd "C-c C-k") 'obrg-edit-src-abort)
+    (define-key elpy-mode-map (kbd "C-M-x") 'elpy-shell-send-group)
+   )
+)
+
+; fix bug in elpy
+(setq elpy-shell-echo-output nil)
+(setq python-shell--interpreter "python")
+(setq python-shell--interpreter-args "-i")
+;;(print org-src-window-setup)
+
+(setq org-src-window-setup 'current-window)
+
+
+
+(global-set-key (kbd "C-M-S-j") 'shrink-window-horizontally)
+(global-set-key (kbd "C-M-S-l") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-M-S-k") 'shrink-window)
+(global-set-key (kbd "C-M-S-i") 'enlarge-window)
+
+(add-hook 'org-shiftup-final-hook 'windmove-up)
+(add-hook 'org-shiftleft-final-hook 'windmove-left)
+(add-hook 'org-shiftdown-final-hook 'windmove-down)
+(add-hook 'org-shiftright-final-hook 'windmove-right)
+
+(require 'windmove)
+(windmove-default-keybindings)
+(windmove-default-keybindings 'shift)
+(global-set-key (kbd "M-I") 'windmove-up)
+(global-set-key (kbd "M-K") 'windmove-down)
+(global-set-key (kbd "M-L") 'windmove-right)
+(global-set-key (kbd "M-J") 'windmove-left)
+
+(load-file "~/elisp/r-org-utils.el")
