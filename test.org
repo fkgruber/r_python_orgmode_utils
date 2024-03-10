@@ -1,0 +1,56 @@
+#+TITLE: Test ob-reticulate
+#+PROPERTY: header-args:R :session *R:2* :exports both :colnames yes
+#+PROPERTY: header-args:python :session *R:2* :exports both :colnames yes
+
+* Start ob-reticulate
+#+begin_src R
+library(reticulate)
+reticulate::use_condaenv("pytorch")
+reticulate::py_run_string("def __PYTHON_EL_eval(source, filename):
+    import ast, sys
+    if sys.version_info[0] == 2:
+        from __builtin__ import compile, eval, globals
+    else:
+        from builtins import compile, eval, globals
+    try:
+        p, e = ast.parse(source, filename), None
+    except SyntaxError:
+        t, v, tb = sys.exc_info()
+        sys.excepthook(t, v, tb.tb_next)
+        return
+    if p.body and isinstance(p.body[-1], ast.Expr):
+        e = p.body.pop()
+    try:
+        g = globals()
+        exec(compile(p, filename, 'exec'), g, g)
+        if e:
+            return eval(compile(ast.Expression(e.value), filename, 'eval'), g, g)
+    except Exception:
+        t, v, tb = sys.exc_info()
+        sys.excepthook(t, v, tb.tb_next)")
+
+reticulate::py_run_string("def __PYTHON_EL_eval_file(filename, tempname, delete):
+    import codecs, os, re
+    pattern = r'^[ 	]*#.*?coding[:=][ 	]*([-_.a-zA-Z0-9]+)'
+    with codecs.open(tempname or filename, encoding='latin-1') as file:
+        match = re.match(pattern, file.readline())
+        match = match or re.match(pattern, file.readline())
+        encoding = match.group(1) if match else 'utf-8'
+    with codecs.open(tempname or filename, encoding=encoding) as file:
+        source = file.read().encode(encoding)
+    if delete and tempname:
+        os.remove(tempname)
+    return __PYTHON_EL_eval(source, filename)")
+#+end_src
+
+#+RESULTS:
+|---|
+
+
+* test it
+#+begin_src python :results output
+print("test2")
+#+end_src
+
+#+RESULTS:
+: test
